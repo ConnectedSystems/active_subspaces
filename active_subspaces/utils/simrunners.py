@@ -3,6 +3,15 @@
 import numpy as np
 import time
 from misc import process_inputs
+import warnings
+import itertools
+# checking to see if system has multiprocessing
+try:
+	import multiprocessing as mp
+	HAS_MP = True
+except ImportError, e:
+	HAS_MP = False
+	pass
 
 class SimulationRunner():
     """A class for running several simulations at different input values.
@@ -39,7 +48,16 @@ class SimulationRunner():
         if not hasattr(fun, '__call__'):
             raise TypeError('fun should be a callable function.')
 
-        self.fun = fun
+		Parameters
+		----------
+		fun : function  
+			a function that runs the simulation for a fixed value of the input 
+			parameters, given as an ndarray. This function returns the quantity 
+			of interest from the model. Often, this function is a wrapper to a 
+			larger simulation code.
+		"""
+		if not hasattr(fun, '__call__'):
+			raise TypeError('fun should be a callable function.')
 
     def run(self, X):
         """Run the simulation at several input values.
@@ -65,11 +83,17 @@ class SimulationRunner():
         parallelize this for-loop.
         """
 
-        # right now this just wraps a sequential for-loop.
-        # should be parallelized
+		# Setup the selected backend
+		if backend == 'loop':
+			self.run = self._run_loop	
+		elif backend == 'multiprocessing':
+			if num_cores is None:
+				num_cores = mp.cpu_count() - 1
+			self.num_cores = num_cores
+			self.run = self._run_multiprocessing
+		elif backend == 'celery':
+			self.run = self._run_celery
 
-        X, M, m = process_inputs(X)
-        F = np.zeros((M, 1))
 
         # TODO: provide some timing information
         # start = time.time()
@@ -80,7 +104,20 @@ class SimulationRunner():
         # TODO: provide some timing information
         # end = time.time() - start
 
-        return F
+	def _run_loop(self, X):
+		""" Runs a simple for-loop over the target function
+		"""
+		X, M, m = process_inputs(X)
+		# We store the output in a list so that we can handle failures of the function
+		# to evaluate
+		output = []
+		for i in range(M):
+			# Try to evaluate the function
+			try:
+				out = self.fun(X[i,:].reshape((1,m)))
+			except:
+				out = None
+			output.append(out)
 
 class SimulationGradientRunner():
     """Evaluates gradients at several input values.
@@ -122,7 +159,12 @@ class SimulationGradientRunner():
         if not hasattr(dfun, '__call__'):
             raise TypeError('fun should be a callable function.')
 
-        self.dfun = dfun
+	Notes
+	-----
+	The function dfun should take an ndarray of size 1-by-m and return an
+	ndarray of shape 1-by-m. This ndarray is the gradient of the quantity of
+	interest from the simulation. Often, the function is a wrapper to a larger
+	simulation code.
 
     def run(self, X):
         """Run at several input values.
