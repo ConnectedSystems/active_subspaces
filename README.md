@@ -5,11 +5,16 @@ This repository is a fork of the [`active-subspaces`](https://github.com/paulcon
 **I do not claim ownership or authorship.**
 
 The original package currently contains a bug which renders its use on Windows platforms unworkable.
-I have contributed a fix and submitted a [PR](https://github.com/paulcon/active_subspaces/pull/49) in June 2018, but this has yet to be merged.
+I submitted a PR in [June 2018](https://github.com/paulcon/active_subspaces/pull/49).
+
+In the process of preparing this fork I have submitted another [PR](https://github.com/paulcon/active_subspaces/pull/51).
 
 A working version for Windows users is provided in this repository.
 
-Install with
+This fork currently only works with Python 2, but work is intended to enable
+use with Python 3.
+
+Install from this repository with
 
 ```bash
 pip install https://github.com/ConnectedSystems/active_subspaces/zipball/master
@@ -90,7 +95,7 @@ To contribute to this project, please follow these steps. Thanks to [Marco Tezze
 
 1. Open a new issue describing the bug to fix or feature to add. Even if you think it's relatively minor, it's helpful to know what people are working on.
 2. Follow the normal process of [forking][] the project, and set up a new branch to work in.  It's important that each group of changes be done in separate branches to ensure that a pull request only includes the commits related to that bug or feature.
-3. Significant changes should be accompanied by tests. The project already has good test coverage, so look at some of the existing tests if you're unsure how to go about it. 
+3. Significant changes should be accompanied by tests. The project already has good test coverage, so look at some of the existing tests if you're unsure how to go about it.
 4. Push the commits to your fork and submit a [pull request][]. Please, remember to rebase properly in order to maintain a clean, linear git history.
 
 [forking]: https://help.github.com/articles/fork-a-repo
